@@ -117,5 +117,3 @@ func (this *Server) Start() {
 	}
 
 }
-//添加了用户推出和聊天的功能
-//add user exit and chat function
