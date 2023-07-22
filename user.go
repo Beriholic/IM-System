@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net"
+	"strings"
 )
 
 var cnt int = 1
@@ -71,7 +72,7 @@ func (this *User) SendMsg(msg string) {
 	this.conn.Write([]byte(msg))
 }
 
-func (this *User) DoMessage(msg string) {
+func (this *User) DoMessage(msg string) { //message processing
 	if msg == "who" {
 		//Query all online users
 		this.server.maplock.Lock()
@@ -93,6 +94,27 @@ func (this *User) DoMessage(msg string) {
 			this.Name = newName
 			this.SendMsg("you have update your name:" + this.Name + "\n")
 		}
+
+	} else if len(msg) > 4 && msg[:3] == "to|" {
+		split := strings.Split(msg, "|")
+		if len(split) != 3 {
+			this.SendMsg("format error, please try again\n please use 'to|name|message' format\n eg: to|user1|hello\n")
+			return
+		}
+		removeName := split[1]
+		removeUser, ok := this.server.OnlineMay[removeName]
+
+		if !ok {
+			this.SendMsg(fmt.Sprintf("user:%s may be offline or does not exist\n", removeName))
+		}
+
+		sendMsg := split[2]
+
+		if len(sendMsg) == 0 {
+			this.SendMsg("message can not be empty,Please try again\n")
+			return
+		}
+		removeUser.SendMsg(fmt.Sprintf("%s send you a message:%s\n", this.Name, sendMsg))
 
 	} else {
 		this.server.BroadCast(this, msg)
