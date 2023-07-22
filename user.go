@@ -73,7 +73,7 @@ func (this *User) SendMsg(msg string) {
 }
 
 func (this *User) DoMessage(msg string) { //message processing
-	if msg == "who" {
+	if msg == "list-all" {
 		//Query all online users
 		this.server.maplock.Lock()
 		for _, user := range this.server.OnlineMay {
