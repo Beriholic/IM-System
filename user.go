@@ -77,7 +77,7 @@ func (this *User) DoMessage(msg string) { //message processing
 		//Query all online users
 		this.server.maplock.Lock()
 		for _, user := range this.server.OnlineMay {
-			onlineMeg := fmt.Sprintf("[%v]%v:ONLINE\n", user.Name, user.Addr)
+			onlineMeg := fmt.Sprintf("[%v]%v:ONLINE\n", user.Addr, user.Name)
 			this.SendMsg(onlineMeg)
 		}
 		this.server.maplock.Unlock()
