@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 	"sync"
+	"time"
 )
 
 type Server struct {
@@ -14,6 +15,8 @@ type Server struct {
 	maplock   sync.RWMutex
 	Message   chan string
 }
+
+//Listen user is active or not
 
 // Create an interface for the Server
 func NewServer(ip string, port int) *Server {
@@ -50,6 +53,7 @@ func (this *Server) ListenMessage() {
 // Do handler
 func (this *Server) Handler(conn net.Conn) {
 	user := NewUser(conn, this)
+	isLive := make(chan bool)
 
 	user.Online()
 
@@ -75,11 +79,27 @@ func (this *Server) Handler(conn net.Conn) {
 			msg := string(buf[:n-1])
 
 			//Broadcast message
-
 			user.DoMessage(msg)
+
+			//this user is alive
+			isLive <- true
 		}
 	}()
 
+	for {
+		select {
+		case <-isLive: //reset timer
+		case <-time.After(time.Second * 300): //set 300s timer,if timeout,force offline
+			user.SendMsg("you are out")
+
+			//close user channel
+			close(user.Ch)
+
+			//close the connection
+			user.conn.Close()
+			return
+		}
+	}
 }
 
 // Interface for starting the server

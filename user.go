@@ -52,7 +52,7 @@ func (this *User) Online() {
 	this.server.maplock.Unlock()
 
 	//Broadcast User Online Message
-	this.server.BroadCast(this, "上线")
+	this.server.BroadCast(this, "ONELINE")
 }
 
 // user offline
