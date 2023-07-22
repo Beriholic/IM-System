@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Defualt user name
 var cnt int = 1
 
 type User struct {
@@ -73,14 +74,15 @@ func (this *User) SendMsg(msg string) {
 }
 
 func (this *User) DoMessage(msg string) { //message processing
+	//Query all online users
 	if msg == "list-all" {
-		//Query all online users
 		this.server.maplock.Lock()
 		for _, user := range this.server.OnlineMay {
 			onlineMeg := fmt.Sprintf("[%v]%v:ONLINE\n", user.Addr, user.Name)
 			this.SendMsg(onlineMeg)
 		}
 		this.server.maplock.Unlock()
+		//Rename user name
 	} else if len(msg) > 7 && msg[:7] == "rename|" {
 		newName := msg[7:]
 		_, ok := this.server.OnlineMay[newName]
@@ -94,7 +96,7 @@ func (this *User) DoMessage(msg string) { //message processing
 			this.Name = newName
 			this.SendMsg("you have update your name:" + this.Name + "\n")
 		}
-
+		//User chat
 	} else if len(msg) > 4 && msg[:3] == "to|" {
 		split := strings.Split(msg, "|")
 		if len(split) != 3 {
@@ -115,7 +117,7 @@ func (this *User) DoMessage(msg string) { //message processing
 			return
 		}
 		removeUser.SendMsg(fmt.Sprintf("%s send you a message:%s\n", this.Name, sendMsg))
-
+		//Broadcast messages
 	} else {
 		this.server.BroadCast(this, msg)
 	}
