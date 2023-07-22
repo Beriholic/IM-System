@@ -63,7 +63,7 @@ func (this *User) Offline() {
 	this.server.maplock.Unlock()
 
 	//Broadcast User Offline Message
-	this.server.BroadCast(this, "下线")
+	this.server.BroadCast(this, "OFFLINE")
 
 }
 
@@ -76,10 +76,24 @@ func (this *User) DoMessage(msg string) {
 		//Query all online users
 		this.server.maplock.Lock()
 		for _, user := range this.server.OnlineMay {
-			onlineMeg := fmt.Sprintf("[%v]%v:在线\n", user.Name, user.Addr)
+			onlineMeg := fmt.Sprintf("[%v]%v:ONLINE\n", user.Name, user.Addr)
 			this.SendMsg(onlineMeg)
 		}
 		this.server.maplock.Unlock()
+	} else if len(msg) > 7 && msg[:7] == "rename|" {
+		newName := msg[7:]
+		_, ok := this.server.OnlineMay[newName]
+		if ok {
+			this.SendMsg("this name is used\n")
+		} else {
+			this.server.maplock.Lock()
+			delete(this.server.OnlineMay, this.Name)
+			this.server.OnlineMay[newName] = this
+			this.server.maplock.Unlock()
+			this.Name = newName
+			this.SendMsg("you have update your name:" + this.Name + "\n")
+		}
+
 	} else {
 		this.server.BroadCast(this, msg)
 	}
