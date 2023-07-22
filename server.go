@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"sync"
 )
@@ -58,6 +59,32 @@ func (this *Server) Handler(conn net.Conn) {
 	//Broadcast User Online Message
 	this.BroadCast(user, "上线")
 
+	//Recieve client message
+	go func() {
+		//buf is used to store the message sent by the client
+		//4096 is the size of the buffer
+		//revieve the message sent by the client
+		buf := make([]byte, 4096)
+		for {
+			n, err := conn.Read(buf)
+
+			if n == 0 {
+				this.BroadCast(user, "下线")
+				return
+			}
+
+			if err != nil && err != io.EOF {
+				fmt.Println("Conn Read err:", err)
+				return
+			}
+			//Get rid of the newline('\n') character
+			msg := string(buf[:n-1])
+
+			//Broadcast User Online Message
+			this.BroadCast(user, msg)
+		}
+	}()
+
 }
 
 // Interface for starting the server
@@ -90,3 +117,5 @@ func (this *Server) Start() {
 	}
 
 }
+//添加了用户推出和聊天的功能
+//add user exit and chat function
