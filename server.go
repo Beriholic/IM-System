@@ -49,15 +49,9 @@ func (this *Server) ListenMessage() {
 
 // Do handler
 func (this *Server) Handler(conn net.Conn) {
-	user := NewUser(conn)
+	user := NewUser(conn, this)
 
-	//Add User to the list
-	this.maplock.Lock()
-	this.OnlineMay[user.Name] = user
-	this.maplock.Unlock()
-
-	//Broadcast User Online Message
-	this.BroadCast(user, "上线")
+	user.Online()
 
 	//Recieve client message
 	go func() {
@@ -69,7 +63,7 @@ func (this *Server) Handler(conn net.Conn) {
 			n, err := conn.Read(buf)
 
 			if n == 0 {
-				this.BroadCast(user, "下线")
+				user.Offline()
 				return
 			}
 
@@ -80,8 +74,9 @@ func (this *Server) Handler(conn net.Conn) {
 			//Get rid of the newline('\n') character
 			msg := string(buf[:n-1])
 
-			//Broadcast User Online Message
-			this.BroadCast(user, msg)
+			//Broadcast message
+
+			user.DoMessage(msg)
 		}
 	}()
 
@@ -96,7 +91,7 @@ func (this *Server) Start() {
 		fmt.Println("net.Listener err:", err)
 		return
 	}
-	//close listen socket
+	//layered call close Listener
 	defer Listener.Close()
 
 	//start a goroutine to listen for channel messages
