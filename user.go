@@ -66,6 +66,21 @@ func (this *User) Offline() {
 	this.server.BroadCast(this, "下线")
 
 }
+
+func (this *User) SendMsg(msg string) {
+	this.conn.Write([]byte(msg))
+}
+
 func (this *User) DoMessage(msg string) {
-	this.server.BroadCast(this, msg)
+	if msg == "who" {
+		//Query all online users
+		this.server.maplock.Lock()
+		for _, user := range this.server.OnlineMay {
+			onlineMeg := fmt.Sprintf("[%v]%v:在线\n", user.Name, user.Addr)
+			this.SendMsg(onlineMeg)
+		}
+		this.server.maplock.Unlock()
+	} else {
+		this.server.BroadCast(this, msg)
+	}
 }
