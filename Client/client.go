@@ -122,14 +122,27 @@ func (this *Client) SelectUser() {
 }
 
 func (this *Client) PrivateChat() {
-	var receiver string
+
 	var chatMsg string
+	var receiver string = ""
+	fmt.Println("*******************" + this.Name + "*****************")
 
-	this.SelectUser()
 	fmt.Println(">>>>>input message to private chat,use 'exit' to exit<<<<<<")
+	this.SelectUser()
 	fmt.Println("please input receiver name:")
-	fmt.Scanln(&receiver)
 
+	for {
+		fmt.Scanln(&receiver)
+
+		if receiver == this.Name {
+			fmt.Println("can't private chat with yourself\n please input again")
+			continue
+		} else {
+			break
+		}
+	}
+
+on:
 	for receiver != "exit" {
 		fmt.Println("please input message,user 'exit' to exit:")
 		fmt.Scanln(&chatMsg)
@@ -149,9 +162,7 @@ func (this *Client) PrivateChat() {
 			fmt.Println("please input message,user 'exit' to exit:")
 			fmt.Scanln(&chatMsg)
 		}
-		this.SelectUser()
-		fmt.Println("please input receiver name:")
-		fmt.Scanln(&receiver)
+		break on
 	}
 
 }
