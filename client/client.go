@@ -60,7 +60,7 @@ func (this *Client) menu() bool {
 
 	fmt.Scanln(&mod)
 
-	if !(mod >= 0 && mod <= 3) {
+	if !(mod >= 0 && mod <= 4) {
 		fmt.Println("====>input error, please input again<====")
 		return false
 	}
